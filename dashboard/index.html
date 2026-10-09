@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GlucoTwin Virtual Ward</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/vendor/plotly-basic.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">G</div>
+      <div>GlucoTwin India<small>Virtual diabetes ward · digital twin decision support</small></div>
+    </div>
+    <div class="clock" id="clock">
+      <span class="model-chip" id="modelChip"></span>
+      <button class="btn" id="back" title="Back 1 hour">−1 h</button>
+      <span class="clock-time"><span class="live-dot"></span><span id="now">-</span></span>
+      <button class="btn" id="fwd" title="Forward 1 hour">+1 h</button>
+      <select id="speed" aria-label="Replay speed">
+        <option value="5">5 min / tick</option>
+        <option value="15" selected>15 min / tick</option>
+        <option value="30">30 min / tick</option>
+      </select>
+      <button class="btn primary" id="play">▶ Replay live stream</button>
+      <button class="btn" id="theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="ward" aria-label="Patients">
+      <h2>Virtual ward · sorted by 2-h risk</h2>
+      <div id="wardList"></div>
+    </aside>
+
+    <main id="main">
+      <div class="empty">Loading virtual ward…</div>
+    </main>
+  </div>
+
+  <dialog id="fhirDialog">
+    <h3>FHIR R4 record (ABDM-compatible resource shapes)</h3>
+    <p class="muted">Synthetic bundle. Patient, Condition (SNOMED CT), Observation (LOINC), MedicationStatement (RxNorm).</p>
+    <pre id="fhirPre"></pre>
+    <form method="dialog"><button class="btn">Close</button></form>
+  </dialog>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
