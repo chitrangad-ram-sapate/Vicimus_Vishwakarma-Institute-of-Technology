@@ -60,13 +60,26 @@
       }
     }
   },
+  "events_180_uncalibrated": {
+    "excursions": 298,
+    "detected": 216,
+    "sensitivity_pct": 72.48322147651007,
+    "median_lead_min": 40.0,
+    "false_alerts_per_day": 1.5024453863710465
+  },
   "events_180": {
     "excursions": 298,
-    "detected": 281,
-    "sensitivity_pct": 94.29530201342281,
-    "median_lead_min": 67.5,
-    "false_alerts_per_day": 2.5629950708682556,
-    "threshold": 0.5
+    "detected": 211,
+    "sensitivity_pct": 70.80536912751678,
+    "median_lead_min": 46.25,
+    "false_alerts_per_day": 1.2041657876062064,
+    "fold_thresholds": [
+      0.6,
+      0.525,
+      0.425,
+      0.625,
+      0.6
+    ]
   },
   "ablation": {
     "CGM only": {

@@ -359,16 +359,16 @@
       "positives": 4041,
       "auroc": 0.9583890679796343,
       "auprc": 0.8823342016990383,
-      "threshold": 0.725,
-      "precision": 0.8589580686149937,
-      "recall": 0.6691413016580054
+      "threshold": 0.7999999999999999,
+      "precision": 0.9009643916913946,
+      "recall": 0.6010888393961891
     },
     "events": {
       "excursions": 162,
-      "detected": 159,
-      "sensitivity_pct": 98.14814814814815,
-      "median_lead_min": 92.5,
-      "false_alerts_per_patient_day": 1.171875
+      "detected": 133,
+      "sensitivity_pct": 82.09876543209876,
+      "median_lead_min": 70.0,
+      "false_alerts_per_patient_day": 0.53125
     }
   },
   "shap_by_stream": {

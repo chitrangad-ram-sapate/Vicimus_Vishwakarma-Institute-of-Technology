@@ -116,3 +116,13 @@ def test_event_lead_time():
     p[20:40] = 0.9
     r = event_lead_times(g, p, 0.5)
     assert r["events"] == 1 and r["detected"] == 1 and r["median_lead_min"] > 0
+
+
+def test_alert_policy_confirms_and_snoozes():
+    from glucotwin.metrics import alert_notifications
+    p = np.zeros(60)
+    p[5] = 0.9                 # single-reading blip: not confirmed, no alert
+    p[10:14] = 0.9             # confirmed at 11 -> alert
+    p[16:20] = 0.9             # within 60-min snooze -> suppressed
+    p[30:33] = 0.9             # after snooze -> alert at 31
+    assert list(alert_notifications(p, 0.5)) == [11, 31]

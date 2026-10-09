@@ -30,7 +30,7 @@ from sklearn.model_selection import GroupKFold
 from . import config as C
 from .features import feature_groups, patient_features
 from .meals import Meal
-from .metrics import classification_report, event_lead_times, regression_report
+from .metrics import choose_alert_threshold, classification_report, event_lead_times, regression_report
 from .models import EventClassifier, GlucoseForecaster
 from .twin import Twin, TwinParams, build_inputs, calibrate, ehr_prior
 
@@ -167,6 +167,7 @@ def evaluate(feat: pd.DataFrame) -> dict:
         feats = [f for grp in gs for f in g[grp]]
         preds = {h: np.full(len(feat), np.nan) for h in C.HORIZONS_MIN}
         p180, p140 = np.full(len(feat), np.nan), np.full(len(feat), np.nan)
+        alert180, fold_thr = np.full(len(feat), np.nan), []
         for tr_idx, te_idx in folds:
             tr, te = feat.iloc[tr_idx], feat.iloc[te_idx]
             fc = GlucoseForecaster(feats, quantiles=False, n_estimators=300).fit(tr)
@@ -175,6 +176,18 @@ def evaluate(feat: pd.DataFrame) -> dict:
                 preds[h][te_idx] = pr[h]["point"]
             p180[te_idx] = EventClassifier(feats, "y_spike", n_estimators=250).fit(tr).predict_proba(te)
             p140[te_idx] = EventClassifier(feats, "y_spike140", n_estimators=250).fit(tr).predict_proba(te)
+            if name.startswith("+ Twin"):
+                # nested, leakage-free operating point: hold out 25% of this fold's *training* participants,
+                # pick the most sensitive threshold with <= 1 false alert/day there, apply it to the test fold
+                tr_ids = np.array(sorted(tr["patient_id"].unique()))
+                inner_cal = set(np.random.default_rng(len(te_idx)).choice(tr_ids, max(2, len(tr_ids) // 4), replace=False))
+                inner_tr = tr[~tr["patient_id"].isin(inner_cal)]
+                inner_ca = tr[tr["patient_id"].isin(inner_cal) & tr["eval"]]
+                clf_in = EventClassifier(feats, "y_spike", n_estimators=250).fit(inner_tr)
+                ca_p = inner_ca.assign(p=clf_in.predict_proba(inner_ca))
+                thr = choose_alert_threshold([(d["cgm"].to_numpy(), d["p"].to_numpy()) for _, d in ca_p.groupby("patient_id")])
+                fold_thr.append(thr)
+                alert180[te_idx] = (p180[te_idx] >= thr).astype(float)
         m = feat["eval"].to_numpy()
         abl[name] = {h: regression_report(feat[f"y_{h}"].to_numpy()[m], preds[h][m]) for h in C.HORIZONS_MIN}
         abl[name]["spike180"] = classification_report(feat["y_spike"].to_numpy()[m], p180[m], 0.5)
@@ -183,23 +196,35 @@ def evaluate(feat: pd.DataFrame) -> dict:
               + f"   AUROC >140: {abl[name]['spike140'].get('auroc', float('nan')):.3f}"
               + f"   >180: {abl[name]['spike180'].get('auroc', float('nan')):.3f}")
         if name.startswith("+ Twin"):
-            evd = feat[m].assign(p=p180[m])
-            ev_stats = [event_lead_times(d["cgm"].to_numpy(), d["p"].to_numpy(), 0.5) for _, d in evd.groupby("patient_id")]
-            n_ev = sum(e["events"] for e in ev_stats)
-            det = sum(e["detected"] for e in ev_stats)
-            leads = [e["median_lead_min"] for e in ev_stats if e["detected"]]
-            days = sum(len(d) for _, d in evd.groupby("patient_id")) * C.SAMPLE_MIN / 1440
-            fa = sum(e["false_alerts_per_day"] * len(d) * C.SAMPLE_MIN / 1440
-                     for e, (_, d) in zip(ev_stats, evd.groupby("patient_id")))
-            out["events_180"] = {"excursions": n_ev, "detected": det, "sensitivity_pct": 100 * det / max(n_ev, 1),
-                                 "median_lead_min": float(np.median(leads)) if leads else None,
-                                 "false_alerts_per_day": fa / days, "threshold": 0.5}
+            out["events_180_uncalibrated"] = _event_summary(feat[m], p180[m], 0.5)
+            out["events_180"] = _event_summary(feat[m], alert180[m], 0.5)
+            out["events_180"]["fold_thresholds"] = [round(t, 3) for t in fold_thr]
+            e0, e1 = out["events_180_uncalibrated"], out["events_180"]
+            print(f"  alerts @0.5: {e0['detected']}/{e0['excursions']} detected, {e0['false_alerts_per_day']:.2f} FA/day | "
+                  f"nested operating point {fold_thr}: {e1['detected']}/{e1['excursions']} detected, "
+                  f"lead {e1['median_lead_min']} min, {e1['false_alerts_per_day']:.2f} FA/day")
     out["ablation"] = abl
 
     # by-status breakdown for the full hybrid at 60 min
     full = abl["+ Twin physiology (full hybrid)"]
     out["full_hybrid_60_rmse"] = full[60]["rmse"]
     return out
+
+
+def _event_summary(d: pd.DataFrame, score: np.ndarray, thr: float) -> dict:
+    d = d.assign(p=score)
+    stats, days, fa = [], 0.0, 0.0
+    for _, g in d.groupby("patient_id"):
+        e = event_lead_times(g["cgm"].to_numpy(), g["p"].to_numpy(), thr)
+        n_days = len(g) * C.SAMPLE_MIN / 1440
+        stats.append(e)
+        days += n_days
+        fa += e["false_alerts_per_day"] * n_days
+    n_ev = sum(e["events"] for e in stats)
+    det = sum(e["detected"] for e in stats)
+    leads = [e["median_lead_min"] for e in stats if e["detected"]]
+    return {"excursions": n_ev, "detected": det, "sensitivity_pct": 100 * det / max(n_ev, 1),
+            "median_lead_min": float(np.median(leads)) if leads else None, "false_alerts_per_day": fa / days}
 
 
 def write_report(tw: pd.DataFrame, res: dict) -> None:
@@ -250,10 +275,12 @@ def write_report(tw: pd.DataFrame, res: dict) -> None:
     lines += ["", f"- Full hybrid at 60 min: MARD {full[60]['mard_pct']:.1f}%, Clarke A+B {full[60]['clarke_AB_pct']:.1f}%.",
               f"- Personal twin calibration reduced the twin's forecast loss by {res['twin_calibration_gain_pct']:.0f}% on average vs the lab-based prior."]
     if res.get("events_180"):
-        e = res["events_180"]
-        lines.append(f"- Excursions above 180 mg/dL in the evaluation window: {e['detected']}/{e['excursions']} flagged in advance"
-                     + (f", median lead {e['median_lead_min']:.0f} min" if e["median_lead_min"] else "")
-                     + f", {e['false_alerts_per_day']:.2f} false alerts per participant-day at an uncalibrated 0.5 threshold.")
+        e, e0 = res["events_180"], res["events_180_uncalibrated"]
+        lines.append(f"- **Clinical operating point** (nested: each fold picks its threshold on held-out *training* participants, "
+                     f"targeting ≤ 1 false alert/day): {e['detected']}/{e['excursions']} excursions above 180 mg/dL flagged in advance "
+                     f"({e['sensitivity_pct']:.0f}%), median lead {e['median_lead_min']:.0f} min, "
+                     f"**{e['false_alerts_per_day']:.2f} false alerts per participant-day** "
+                     f"(vs {e0['detected']}/{e0['excursions']} and {e0['false_alerts_per_day']:.2f}/day at a naive 0.5 threshold).")
     lines += ["- **Where the hybrid helps:** the full model beats CGM-only at every horizon, and wearable + meal data improve "
               "spike discrimination. **Where it does not (yet):** the twin alone is worse than persistence at 30 min "
               "(its value is at longer horizons and for simulation), and fasting labs add no measurable accuracy with n = 45."]

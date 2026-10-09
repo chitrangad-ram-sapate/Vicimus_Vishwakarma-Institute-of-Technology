@@ -13,3 +13,6 @@ artifacts/
 Thumbs.db
 .vscode/
 .idea/
+
+# Team-only presenter notes (not part of the submission)
+presenter/

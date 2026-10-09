@@ -13,7 +13,7 @@
 
 - Full hybrid at 60 min: MARD 10.8%, Clarke A+B 99.6%.
 - Personal twin calibration reduced the twin's forecast loss by 30% on average vs the lab-based prior.
-- Excursions above 180 mg/dL in the evaluation window: 281/298 flagged in advance, median lead 68 min, 2.56 false alerts per participant-day at an uncalibrated 0.5 threshold.
+- **Clinical operating point** (nested: each fold picks its threshold on held-out *training* participants, targeting ≤ 1 false alert/day): 211/298 excursions above 180 mg/dL flagged in advance (71%), median lead 46 min, **1.20 false alerts per participant-day** (vs 216/298 and 1.50/day at a naive 0.5 threshold).
 - **Where the hybrid helps:** the full model beats CGM-only at every horizon, and wearable + meal data improve spike discrimination. **Where it does not (yet):** the twin alone is worse than persistence at 30 min (its value is at longer horizons and for simulation), and fasting labs add no measurable accuracy with n = 45.
 
 Differences from the synthetic study: CGMacros has no HRV or sleep staging, activity comes from Fitbit METs rather than steps, meals carry macros but no GI (a default GI of 55 is used), and the cohort is American rather than Indian. The pipeline ran unchanged apart from this adapter.

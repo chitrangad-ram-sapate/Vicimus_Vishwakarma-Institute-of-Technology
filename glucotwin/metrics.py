@@ -110,6 +110,27 @@ def excursion_onsets(cgm: np.ndarray, refractory_steps: int = 12) -> list[int]:
     return onsets
 
 
+ALERT_CONFIRM_STEPS = 2    # risk must stay above threshold for 2 readings (10 min) before notifying
+ALERT_SNOOZE_STEPS = 12    # no repeat notification within 60 min, like CGM alarm snooze
+
+
+def alert_notifications(prob: np.ndarray, thr: float, confirm: int = ALERT_CONFIRM_STEPS,
+                        snooze: int = ALERT_SNOOZE_STEPS) -> np.ndarray:
+    """Indices at which a patient/clinician would actually be notified under the alert policy:
+    a confirmed rise of risk above ``thr`` that is not inside the snooze period of a previous alert."""
+    hi = np.nan_to_num(np.asarray(prob, float)) >= thr
+    confirmed = hi.copy()
+    for k in range(1, confirm):
+        confirmed &= np.r_[np.zeros(k, bool), hi[:-k]]
+    rising = confirmed & ~np.r_[False, confirmed[:-1]]
+    out, last = [], -10**9
+    for i in np.where(rising)[0]:
+        if i - last >= snooze:
+            out.append(i)
+            last = i
+    return np.array(out, dtype=int)
+
+
 def event_lead_times(cgm: np.ndarray, prob: np.ndarray, thr: float, window_steps: int = 24,
                      refractory_steps: int = 12) -> dict:
     """Event-level evaluation: for every new excursion above 180 mg/dL, did an alert fire beforehand and how early?
@@ -119,16 +140,14 @@ def event_lead_times(cgm: np.ndarray, prob: np.ndarray, thr: float, window_steps
     g = np.asarray(cgm, float)
     above = g >= C.HYPER_THRESHOLD
     onsets = excursion_onsets(g, refractory_steps)
-    alert = np.nan_to_num(prob) >= thr
+    fired = alert_notifications(prob, thr)
     leads, detected = [], 0
     for o in onsets:
-        lo = max(o - window_steps, 0)
-        hits = np.where(alert[lo:o])[0]
+        hits = fired[(fired >= o - window_steps) & (fired < o)]
         if len(hits):
             detected += 1
-            leads.append((o - (lo + hits[0])) * C.SAMPLE_MIN)
-    alert_onsets = np.where(alert & ~np.r_[False, alert[:-1]])[0]
-    false_alerts = sum(1 for a in alert_onsets if not above[a: a + window_steps + 1].any())
+            leads.append((o - hits[0]) * C.SAMPLE_MIN)
+    false_alerts = sum(1 for a in fired if not above[a: a + window_steps + 1].any())
     days = len(g) * C.SAMPLE_MIN / 1440
     return {
         "events": len(onsets), "detected": detected,

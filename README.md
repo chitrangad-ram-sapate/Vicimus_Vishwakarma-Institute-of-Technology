@@ -78,7 +78,7 @@ Post-meal glucose excursions, which are common with India's carbohydrate-heavy r
 | Twin model | Oral minimal model on a 5-min grid. MAP calibration (Nelder–Mead, EHR-informed log-normal prior). Luenberger-style state observer. Vectorised multi-start forecasting |
 | Forecasting | LightGBM regressors on Δglucose at 30/60/120 min |
 | Uncertainty | **Conformalised Quantile Regression** (Romano et al., 2019), calibrated on held-out patients |
-| Event alerts | LightGBM classifiers. Alert threshold chosen for **≤ 1 false alert per patient-day** (alert fatigue is a safety issue) |
+| Event alerts | LightGBM classifiers + a CGM-style alert policy: threshold chosen for **≤ 1 false alert per patient-day**, 10-min confirmation, 60-min snooze (alert fatigue is a safety issue) |
 | Explainability | LightGBM-native **TreeSHAP**, grouped by data stream and translated to plain language |
 | Backend | FastAPI (typed with Pydantic), stateless "replay clock" that simulates a live stream |
 | Frontend | Dependency-free HTML/CSS/JS + Plotly (bundled for offline demos); light and dark themes; responsive |
@@ -102,9 +102,9 @@ Evaluation protocol (no leakage): **subject-level split**, 48 train / 16 conform
 | 60-min forecast RMSE / MARD | **17.3 mg/dL / 7.5%** (persistence: 37.5) |
 | Clarke error grid A+B (60 min) | **99.7%** |
 | 90% conformal interval coverage (60 min) | **88.8%** |
-| 2-h spike alert AUROC / precision / recall | **0.958 / 0.86 / 0.67** |
-| Excursions flagged in advance | **159/162 (98%)**, median lead **92 min** |
-| False alerts | **1.17 per patient-day** (operating point set for ≤ 1 on calibration patients) |
+| 2-h spike alert AUROC / precision / recall | **0.958 / 0.90 / 0.60** |
+| Excursions flagged in advance | **133/162 (82%)**, median lead **70 min** |
+| False alerts | **0.53 per patient-day** (alert policy: threshold chosen for ≤ 1/day on calibration patients, 10-min confirmation, 60-min snooze) |
 | Twin parameter recovery (Spearman ρ) | insulin action **0.90**, basal glucose **0.87** |
 
 **Ablation: every data stream adds value.** Fusing the wearable and meal stream with CGM cuts 30-min error by about 23%. Adding the twin's physiological simulation gives the best model at every horizon.
@@ -141,7 +141,7 @@ The same pipeline, with one data adapter, was run on **45 real adults** (15 heal
 | **+ Twin physiology (full hybrid)** | 15.6 | 22.5 | 27.1 |
 
 - On real data the full hybrid beats persistence by **22%** at 60 min and beats CGM-only at every horizon. Clarke A+B is **99.6%**.
-- **281/298** real excursions above 180 mg/dL were flagged in advance (median lead **68 min**) at an uncalibrated threshold that produces 2.6 false alerts per day. Tuning this to the ≤ 1/day clinical operating point is the next step.
+- With the same alert policy and a **nested, leakage-free threshold** (each fold tunes it on held-out training participants): **211/298** real excursions above 180 mg/dL flagged in advance (71%), median lead **46 min**, **1.20 false alerts per participant-day**. That is close to, but not yet under, the 1/day target; a naive 0.5 threshold gives 1.50/day.
 - Where it does **not** help yet: the twin alone is worse than persistence at 30 min (its value is at longer horizons and for simulation), and fasting labs add no measurable accuracy with n = 45.
 
 ![Real-data ablation](reports/figures/real_ablation_rmse.png)
