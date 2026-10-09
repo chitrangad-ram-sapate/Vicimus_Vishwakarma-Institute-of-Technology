@@ -54,7 +54,7 @@ def ehr_prior(ehr_row: pd.Series) -> TwinParams:
     """Population prior conditioned on the patient's EHR, i.e. the static stream seeding the twin."""
     gb = float(ehr_row["fpg"]) if np.isfinite(ehr_row["fpg"]) else 120.0
     a1c = float(ehr_row["hba1c"])
-    kx = 3.0e-4 if ehr_row["status"] == "Prediabetes" else 1.4e-4 * np.exp(-0.25 * (a1c - 7.0))
+    kx = 3.0e-4 if ehr_row["status"] != "T2D" else 1.4e-4 * np.exp(-0.25 * (a1c - 7.0))
     return TwinParams(gb=gb, sg=0.013, kx=kx, p2=0.028, gut=1.0, k_ex=9e-5)
 
 
@@ -80,11 +80,16 @@ def build_inputs(stream: pd.DataFrame, meals: pd.DataFrame, weight_kg: float) ->
     t0 = ts[0]
     logged = meals[meals["logged"]].sort_values("logged_ts")
     steps = ((logged["logged_ts"] - t0).dt.total_seconds() / 60.0 / DT).to_numpy()
-    lib = [MEALS[k] for k in logged["meal_key"]]
+    if {"f", "tau"} <= set(logged.columns):      # meals described by their own macros (real datasets)
+        f, tau = logged["f"].to_numpy(float), logged["tau"].to_numpy(float)
+    else:                                           # meals from the Indian food library
+        lib = [MEALS[k] for k in logged["meal_key"]]
+        f = np.array([m.bioavailability for m in lib])
+        tau = np.array([m.absorption_tau for m in lib])
     return TwinInputs(
         ts=ts, cgm=stream["cgm"].to_numpy(float), cadence=stream["steps"].to_numpy(float) / DT,
         meal_step=steps, meal_carbs=logged["logged_carbs_g"].to_numpy(float),
-        meal_f=np.array([m.bioavailability for m in lib]), meal_tau=np.array([m.absorption_tau for m in lib]),
+        meal_f=f, meal_tau=tau,
         vol=1.6 * weight_kg,
     )
 

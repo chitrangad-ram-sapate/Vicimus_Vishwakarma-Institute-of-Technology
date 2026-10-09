@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GlucoTwin India Architecture</title>
+<style>
+  @page { size: 420mm 297mm; margin: 0; }
+  :root {
+    --ink: #0f172a; --muted: #475569; --line: #94a3b8;
+    --static: #2563eb; --static-bg: #eff6ff;
+    --dyn: #059669; --dyn-bg: #ecfdf5;
+    --twin: #7c3aed; --twin-bg: #f5f3ff;
+    --ml: #d97706; --ml-bg: #fffbeb;
+    --app: #db2777; --app-bg: #fdf2f8;
+    --gov: #334155; --gov-bg: #f1f5f9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; color: var(--ink); font-family: "Segoe UI", Inter, system-ui, sans-serif; }
+  .page { width: 420mm; height: 297mm; padding: 14mm 16mm; display: flex; flex-direction: column; }
+  header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-bottom: 10px; }
+  h1 { margin: 0; font-size: 30px; letter-spacing: -0.01em; }
+  header .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  header .team { text-align: right; font-size: 13px; color: var(--muted); }
+  header .team b { color: var(--ink); font-size: 15px; }
+  svg { flex: 1; width: 100%; }
+  .box rect { stroke-width: 1.6; rx: 10; }
+  text { font-family: "Segoe UI", Inter, system-ui, sans-serif; fill: var(--ink); }
+  .t { font-size: 15px; font-weight: 700; }
+  .s { font-size: 12px; fill: var(--muted); }
+  .lane { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .num { font-size: 13px; font-weight: 800; fill: #fff; }
+  .edge { stroke: var(--line); stroke-width: 2; fill: none; marker-end: url(#arr); }
+  .edge.strong { stroke: var(--ink); }
+  .elabel { font-size: 11px; fill: var(--muted); font-style: italic; }
+  footer { display: flex; gap: 22px; font-size: 11.5px; color: var(--muted); border-top: 1px solid #e2e8f0; padding-top: 6px; }
+  footer i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <h1>GlucoTwin India: System Architecture</h1>
+      <div class="sub">Hybrid physiological + ML digital twin for Type 2 Diabetes · static EHR stream ⨯ dynamic wearable stream → 2-hour adverse-event prediction + clinician what-if simulation</div>
+    </div>
+    <div class="team"><b>Team Vicimus</b><br>Vishwakarma Institute of Technology<br>Happiest Health Digital Twin Challenge 2026</div>
+  </header>
+
+  <svg viewBox="0 0 1560 860" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+      </marker>
+    </defs>
+
+    <!-- lanes -->
+    <text x="10" y="22" class="lane" style="fill:var(--muted)">1 · Data sources</text>
+    <text x="400" y="22" class="lane" style="fill:var(--muted)">2 · Ingestion &amp; fusion</text>
+    <text x="760" y="22" class="lane" style="fill:var(--muted)">3 · Digital twin core</text>
+    <text x="1200" y="22" class="lane" style="fill:var(--muted)">4 · Clinical application</text>
+    <line x1="380" y1="10" x2="380" y2="760" stroke="#e2e8f0" stroke-dasharray="4 6"/>
+    <line x1="740" y1="10" x2="740" y2="760" stroke="#e2e8f0" stroke-dasharray="4 6"/>
+    <line x1="1180" y1="10" x2="1180" y2="760" stroke="#e2e8f0" stroke-dasharray="4 6"/>
+
+    <!-- SOURCES -->
+    <g class="box"><rect x="10" y="40" width="350" height="190" fill="var(--static-bg)" stroke="var(--static)"/></g>
+    <text x="26" y="66" class="t" style="fill:var(--static)">STATIC STREAM · EHR</text>
+    <text x="26" y="90" class="s">Demographics, diagnoses (SNOMED CT)</text>
+    <text x="26" y="110" class="s">HbA1c history, FPG, lipids, eGFR, BP (LOINC)</text>
+    <text x="26" y="130" class="s">Medications: metformin, SU, insulin (RxNorm)</text>
+    <text x="26" y="150" class="s">Genetics: TCF7L2 rs7903146, polygenic risk</text>
+    <text x="26" y="176" class="s" style="font-weight:600;fill:var(--static)">HL7 FHIR R4 bundles · ABHA identifier</text>
+    <text x="26" y="196" class="s">Synthetic generator (Synthea-compatible);</text>
+    <text x="26" y="214" class="s">CGMacros bloodwork for real-data validation</text>
+
+    <g class="box"><rect x="10" y="250" width="350" height="230" fill="var(--dyn-bg)" stroke="var(--dyn)"/></g>
+    <text x="26" y="276" class="t" style="fill:var(--dyn)">DYNAMIC STREAM · WEARABLES / IoT</text>
+    <text x="26" y="300" class="s">Continuous glucose monitor (5-min)</text>
+    <text x="26" y="320" class="s">Smartwatch: heart rate, HRV (RMSSD), steps</text>
+    <text x="26" y="340" class="s">Sleep stages (light / deep / REM)</text>
+    <text x="26" y="360" class="s">Meal log: 27-item Indian food library</text>
+    <text x="26" y="380" class="s">(carbs, GI, fat, protein, fibre)</text>
+    <text x="26" y="406" class="s" style="font-weight:600;fill:var(--dyn)">Apple Health / Google Fit-style JSON</text>
+    <text x="26" y="426" class="s">Physiology-based synthetic generator + open</text>
+    <text x="26" y="446" class="s">CGMacros (PhysioNet): CGM + Fitbit + meals</text>
+    <text x="26" y="466" class="s">Replayed as a live stream (simulated clock)</text>
+
+    <g class="box"><rect x="10" y="500" width="350" height="120" fill="var(--gov-bg)" stroke="var(--gov)"/></g>
+    <text x="26" y="526" class="t" style="fill:var(--gov)">VIRTUAL PATIENT ENGINE</text>
+    <text x="26" y="550" class="s">Extended Bergman oral minimal model: dawn</text>
+    <text x="26" y="570" class="s">phenomenon, sleep debt, stress, SU/insulin;</text>
+    <text x="26" y="590" class="s">CGM sensor model (lag, AR(1) noise, dropouts)</text>
+    <text x="26" y="610" class="s">80 Indian T2D / prediabetes patients × 14 days</text>
+
+    <!-- INGESTION -->
+    <g class="box"><rect x="400" y="40" width="320" height="150" fill="#fff" stroke="var(--static)"/></g>
+    <text x="416" y="66" class="t">FHIR parser → EHR feature vector</text>
+    <text x="416" y="90" class="s">15 static features (age, BMI, HbA1c, FPG,</text>
+    <text x="416" y="110" class="s">duration, therapy, TCF7L2, PRS, eGFR …)</text>
+    <text x="416" y="136" class="s" style="font-weight:600">→ EHR-informed twin prior</text>
+    <text x="416" y="156" class="s">Gb ← fasting glucose; insulin action ← HbA1c,</text>
+    <text x="416" y="176" class="s">disease status</text>
+
+    <g class="box"><rect x="400" y="250" width="320" height="230" fill="#fff" stroke="var(--dyn)"/></g>
+    <text x="416" y="276" class="t">Stream alignment (5-min grid)</text>
+    <text x="416" y="300" class="s">Gap interpolation (≤ 30 min), missingness flag</text>
+    <text x="416" y="320" class="s">CGM lags, slopes, acceleration, variability</text>
+    <text x="416" y="340" class="s">Steps 15–120 min, HR vs 24-h baseline</text>
+    <text x="416" y="360" class="s">HRV vs personal 3-day baseline (stress)</text>
+    <text x="416" y="380" class="s">Last completed night: hours, efficiency, deep %</text>
+    <text x="416" y="400" class="s">Logged carbs / glycaemic load 30–180 min</text>
+    <text x="416" y="426" class="s" style="font-weight:600">Leakage-safe by construction</text>
+    <text x="416" y="446" class="s">(only data available at time t; unit-tested)</text>
+
+    <g class="box"><rect x="400" y="500" width="320" height="120" fill="#fff" stroke="var(--gov)"/></g>
+    <text x="416" y="526" class="t">Evaluation protocol</text>
+    <text x="416" y="550" class="s">Subject split 60 / 20 / 20 (train / conformal / test)</text>
+    <text x="416" y="570" class="s">Twin calibrated on days 1–10 only</text>
+    <text x="416" y="590" class="s">Metrics on days 11–14 of unseen patients</text>
+    <text x="416" y="610" class="s">External check: CGMacros (real participants)</text>
+
+    <!-- TWIN CORE -->
+    <g class="box"><rect x="760" y="40" width="400" height="250" fill="var(--twin-bg)" stroke="var(--twin)"/></g>
+    <circle cx="784" cy="62" r="12" fill="var(--twin)"/><text x="779" y="67" class="num">1</text>
+    <text x="804" y="67" class="t" style="fill:var(--twin)">PERSONALISE · physiological twin</text>
+    <text x="776" y="94" class="s" style="font-family:Consolas,monospace">G′ = −(SG + X + A)·G + SG·Gb + Ra(t)/V</text>
+    <text x="776" y="114" class="s" style="font-family:Consolas,monospace">X′ = p2·(kx·max(G − Gb, 0) − X)</text>
+    <text x="776" y="134" class="s" style="font-family:Consolas,monospace">A′ = (k_ex·cadence − A)/15</text>
+    <text x="776" y="158" class="s">Ra: per-meal gamma absorption, τ from food macros</text>
+    <text x="776" y="182" class="s" style="font-weight:600">MAP calibration of 6 parameters per patient</text>
+    <text x="776" y="202" class="s">(Gb, SG, kx, p2, gut speed, exercise sensitivity)</text>
+    <text x="776" y="222" class="s">Nelder–Mead · multi-horizon loss + EHR prior</text>
+    <circle cx="784" cy="252" r="12" fill="var(--twin)"/><text x="779" y="257" class="num">2</text>
+    <text x="804" y="257" class="t" style="fill:var(--twin)">SYNCHRONISE · state observer</text>
+    <text x="804" y="278" class="s">state nudged toward every CGM reading</text>
+
+    <g class="box"><rect x="760" y="310" width="400" height="230" fill="var(--ml-bg)" stroke="var(--ml)"/></g>
+    <circle cx="784" cy="332" r="12" fill="var(--ml)"/><text x="779" y="337" class="num">3</text>
+    <text x="804" y="337" class="t" style="fill:var(--ml)">PREDICT · hybrid ML layer</text>
+    <text x="776" y="364" class="s">Inputs: CGM + wearables + meal log + EHR</text>
+    <text x="776" y="384" class="s">+ twin-simulated trajectories, carbs-on-board, insulin action</text>
+    <text x="776" y="410" class="s" style="font-weight:600">LightGBM Δglucose @ 30 / 60 / 120 min</text>
+    <text x="776" y="430" class="s">Conformalised quantile regression → 90% intervals</text>
+    <text x="776" y="456" class="s" style="font-weight:600">Event classifiers: P(&gt;180 in 2 h), P(&lt;70 in 2 h)</text>
+    <text x="776" y="476" class="s">Threshold set for ≤ 1 false alert / patient-day</text>
+    <text x="776" y="502" class="s" style="font-weight:600">TreeSHAP explanations, grouped by data stream</text>
+    <text x="776" y="522" class="s">translated to clinician language</text>
+
+    <g class="box"><rect x="760" y="560" width="400" height="120" fill="var(--twin-bg)" stroke="var(--twin)"/></g>
+    <circle cx="784" cy="582" r="12" fill="var(--twin)"/><text x="779" y="587" class="num">4</text>
+    <text x="804" y="587" class="t" style="fill:var(--twin)">SIMULATE · what-if engine</text>
+    <text x="776" y="614" class="s">Roll the synchronised twin forward 5 h with planned</text>
+    <text x="776" y="634" class="s">meals, portions and walks → peak, time &gt; 180</text>
+    <text x="776" y="654" class="s">Ranks region-appropriate meal swaps per patient</text>
+
+    <!-- APP -->
+    <g class="box"><rect x="1200" y="40" width="350" height="140" fill="var(--app-bg)" stroke="var(--app)"/></g>
+    <text x="1216" y="66" class="t" style="fill:var(--app)">FastAPI service</text>
+    <text x="1216" y="90" class="s">/ward · /patients/{id} · /whatif</text>
+    <text x="1216" y="110" class="s">/meal-ranking · /fhir · OpenAPI docs</text>
+    <text x="1216" y="134" class="s">Clinical service layer: TIR, GMI, CV,</text>
+    <text x="1216" y="154" class="s">food response, sleep effect, summaries</text>
+
+    <g class="box"><rect x="1200" y="200" width="350" height="300" fill="var(--app-bg)" stroke="var(--app)"/></g>
+    <circle cx="1224" cy="222" r="12" fill="var(--app)"/><text x="1219" y="227" class="num">5</text>
+    <text x="1244" y="227" class="t" style="fill:var(--app)">ACT · clinician dashboard</text>
+    <text x="1216" y="254" class="s">• Virtual ward triaged by 2-h risk</text>
+    <text x="1216" y="276" class="s">• Glucose history + forecast cone + twin curve</text>
+    <text x="1216" y="298" class="s">• "Why this alert": patient-specific drivers</text>
+    <text x="1216" y="320" class="s">• Wearable panel: HR, HRV, steps, hypnogram</text>
+    <text x="1216" y="342" class="s">• Twin phenotype percentiles</text>
+    <text x="1216" y="364" class="s">• What-if simulator + best meal swaps</text>
+    <text x="1216" y="386" class="s">• Personal food response, sleep vs glucose</text>
+    <text x="1216" y="408" class="s">• EHR, genetics, HbA1c trend, FHIR viewer</text>
+    <text x="1216" y="430" class="s">• Auto-drafted pre-consultation summary</text>
+    <text x="1216" y="460" class="s" style="font-weight:600">Live replay of the stream · light/dark ·</text>
+    <text x="1216" y="480" class="s" style="font-weight:600">offline-capable (no CDN at runtime)</text>
+
+    <g class="box"><rect x="1200" y="520" width="350" height="160" fill="#fff" stroke="var(--app)" stroke-dasharray="6 5"/></g>
+    <text x="1216" y="546" class="t">Users</text>
+    <text x="1216" y="570" class="s">Endocrinologist / GP: OPD &amp; tele-consult</text>
+    <text x="1216" y="592" class="s">Diabetes educator: diet counselling</text>
+    <text x="1216" y="614" class="s">Roadmap: patient app alerts (Hindi / Kannada),</text>
+    <text x="1216" y="636" class="s">ASHA-worker low-bandwidth mode,</text>
+    <text x="1216" y="658" class="s">ABDM HIP/HIU consent integration</text>
+
+    <!-- governance band -->
+    <g class="box"><rect x="10" y="700" width="1540" height="60" fill="var(--gov-bg)" stroke="var(--gov)"/></g>
+    <text x="26" y="726" class="t" style="fill:var(--gov)">PRIVACY &amp; DEPLOYMENT</text>
+    <text x="26" y="748" class="s">Synthetic / open anonymised data only (DPDP Act 2023, HIPAA sandbox rules) · ABHA masked in UI · purpose-limited fields · single Docker container, runs on-premise · MIT-licensed code · decision support, not a medical device</text>
+
+    <!-- edges -->
+    <path class="edge" d="M360 135 H400"/>
+    <path class="edge" d="M360 365 H400"/>
+    <path class="edge" d="M185 480 V500" style="marker-end:none"/>
+    <path class="edge" d="M185 500 V480"/>
+    <path class="edge strong" d="M720 115 H760"/>
+    <text x="724" y="105" class="elabel">prior</text>
+    <path class="edge strong" d="M720 300 C740 300, 740 260, 760 260"/>
+    <text x="722" y="292" class="elabel">CGM</text>
+    <path class="edge strong" d="M720 400 H760"/>
+    <text x="722" y="392" class="elabel">features</text>
+    <path class="edge strong" d="M960 290 V310"/>
+    <text x="968" y="304" class="elabel">twin state &amp; trajectories</text>
+    <path class="edge" d="M1160 175 C1180 175, 1180 120, 1200 120"/>
+    <path class="edge" d="M1160 425 C1180 425, 1180 350, 1200 350"/>
+    <path class="edge" d="M1160 620 C1185 620, 1180 450, 1200 450"/>
+    <path class="edge" d="M1375 180 V200"/>
+    <path class="edge" d="M960 540 V560"/>
+    <path class="edge" d="M560 480 V500"/>
+
+    <!-- feedback loop -->
+    <path d="M1375 500 C1375 520, 1300 520, 1300 520" stroke="none" fill="none"/>
+    <text x="10" y="800" class="s" style="font-size:13px;font-weight:600;fill:var(--ink)">Data flow:</text>
+    <text x="90" y="800" class="s" style="font-size:13px">EHR seeds the twin's prior → wearable stream synchronises it every 5 minutes → ML layer corrects what physiology misses (sleep debt, stress, dawn effect) → alerts with reasons and what-if simulations reach the doctor.</text>
+    <text x="10" y="826" class="s" style="font-size:13px;font-weight:600;fill:var(--ink)">Stack:</text>
+    <text x="90" y="826" class="s" style="font-size:13px">Python 3 · NumPy / SciPy / pandas · LightGBM · scikit-learn · FastAPI + Pydantic · HTML/CSS/JS + Plotly · HL7 FHIR R4 · Docker · pytest</text>
+  </svg>
+
+  <footer>
+    <span><i style="background:var(--static)"></i>Static stream (EHR)</span>
+    <span><i style="background:var(--dyn)"></i>Dynamic stream (wearables)</span>
+    <span><i style="background:var(--twin)"></i>Mechanistic twin</span>
+    <span><i style="background:var(--ml)"></i>Machine learning</span>
+    <span><i style="background:var(--app)"></i>Clinical application</span>
+    <span style="margin-left:auto">github.com/chitrangad-ram-sapate · GlucoTwin India</span>
+  </footer>
+</div>
+</body>
+</html>

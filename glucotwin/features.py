@@ -21,13 +21,14 @@ EHR_FEATURES = ["age", "sex_m", "bmi", "hba1c", "fpg", "diabetes_duration_y", "s
 
 
 def _ehr_vector(row: pd.Series) -> dict:
+    """Numeric EHR vector; fields missing from a real-world record stay NaN (LightGBM handles them)."""
+    num = lambda k: float(row[k]) if k in row and pd.notna(row[k]) else np.nan
     return {
-        "age": row["age"], "sex_m": int(row["sex"] == "M"), "bmi": row["bmi"], "hba1c": row["hba1c"],
-        "fpg": row["fpg"], "diabetes_duration_y": row["diabetes_duration_y"], "status_t2d": int(row["status"] == "T2D"),
-        "metformin": int(row["metformin"]), "sulfonylurea": int(row["sulfonylurea"]),
-        "basal_insulin": int(row["basal_insulin"]), "tcf7l2_rs7903146": row["tcf7l2_rs7903146"],
-        "prs_z": row["prs_z"], "egfr": row["egfr"], "hypertension": int(row["hypertension"]),
-        "family_history": int(row["family_history"]),
+        "age": num("age"), "sex_m": float(row["sex"] == "M"), "bmi": num("bmi"), "hba1c": num("hba1c"),
+        "fpg": num("fpg"), "diabetes_duration_y": num("diabetes_duration_y"), "status_t2d": float(row["status"] == "T2D"),
+        "metformin": num("metformin"), "sulfonylurea": num("sulfonylurea"), "basal_insulin": num("basal_insulin"),
+        "tcf7l2_rs7903146": num("tcf7l2_rs7903146"), "prs_z": num("prs_z"), "egfr": num("egfr"),
+        "hypertension": num("hypertension"), "family_history": num("family_history"),
     }
 
 
@@ -73,7 +74,9 @@ def patient_features(stream: pd.DataFrame, meals: pd.DataFrame, sleep: pd.DataFr
     # last completed night of sleep
     sl = sleep.sort_values("wake")[["wake", "sleep_h", "efficiency", "deep_frac", "rem_frac"]].rename(
         columns={"sleep_h": "sleep_last_h", "efficiency": "sleep_eff", "deep_frac": "sleep_deep", "rem_frac": "sleep_rem"})
-    merged = pd.merge_asof(df[["ts"]], sl, left_on="ts", right_on="wake", direction="backward")
+    sl["wake"] = sl["wake"].astype("datetime64[ns]")
+    merged = pd.merge_asof(df[["ts"]].astype({"ts": "datetime64[ns]"}), sl, left_on="ts", right_on="wake",
+                           direction="backward")
     for c in ("sleep_last_h", "sleep_eff", "sleep_deep", "sleep_rem"):
         out[c] = merged[c].to_numpy()
     out["sleep_debt"] = np.clip(7.0 - out["sleep_last_h"], 0, None)
@@ -84,10 +87,11 @@ def patient_features(stream: pd.DataFrame, meals: pd.DataFrame, sleep: pd.DataFr
     carbs_series = np.zeros(n)
     gl_series = np.zeros(n)
     pos = np.searchsorted(grid, lg["logged_ts"].to_numpy(), side="left")
-    for p_, c_, k_ in zip(pos, lg["logged_carbs_g"].to_numpy(), lg["meal_key"]):
+    gis = lg["gi"].to_numpy(float) if "gi" in lg.columns else np.array([MEALS[k].gi for k in lg["meal_key"]])
+    for p_, c_, gi_ in zip(pos, lg["logged_carbs_g"].to_numpy(), gis):
         if p_ < n:
             carbs_series[p_] += c_
-            gl_series[p_] += c_ * MEALS[k_].gi / 100
+            gl_series[p_] += c_ * gi_ / 100
     cs = pd.Series(carbs_series)
     for w in (6, 12, 24, 36):
         out[f"carbs_{w * 5}m"] = cs.rolling(w, min_periods=1).sum()

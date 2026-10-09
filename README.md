@@ -2,7 +2,7 @@
 
 **A hybrid physiological + machine-learning digital twin that forecasts glucose excursions up to 2 hours ahead for people with Type 2 Diabetes, and lets a doctor test diet, activity and therapy changes on the patient's virtual replica before prescribing them.**
 
-> Submission for the **Happiest Health Digital Twin Challenge 2026**: *Reimagining and Reforming Healthcare in India Summit*, Bengaluru.
+> Team **Vicimus**, Vishwakarma Institute of Technology. Submission for the **Happiest Health Digital Twin Challenge 2026**: *Reimagining and Reforming Healthcare in India Summit*, Bengaluru.
 
 ![Dashboard](reports/figures/dashboard.png)
 
@@ -12,11 +12,10 @@
 
 | | |
 |---|---|
-| **Team name** | _<Team Name>_ |
-| **College / incubator** | _<College Name / Incubator>_ |
+| **Team name** | **Vicimus** |
+| **College** | **Vishwakarma Institute of Technology (VIT), Pune** |
 | **Team leader** | Chitrangad Ram Sapate |
-| **Members** | _<Member 2>_, _<Member 3>_, _<Member 4>_ |
-| **Contact** | _<email>_ |
+| **Team members** | Chitrangad Ram Sapate, Soham Joshi |
 
 ## 2. Project title
 
@@ -39,6 +38,8 @@ Post-meal glucose excursions, which are common with India's carbohydrate-heavy r
 **Adverse event predicted:** a new hyperglycaemic excursion (> 180 mg/dL) within the next 2 hours. Secondary outputs: glucose trajectory at 30/60/120 min with calibrated uncertainty, and hypoglycaemia risk (< 70 mg/dL) for patients on sulfonylureas or insulin.
 
 ## 4. What makes this a *digital twin* (not just a predictor)
+
+![Architecture](docs/architecture.png)
 
 ```
             STATIC STREAM (EHR, FHIR R4)              DYNAMIC STREAM (wearables, 5-min)
@@ -126,7 +127,26 @@ Evaluation protocol (no leakage): **subject-level split**, 48 train / 16 conform
 
 ![Forecast example](reports/figures/forecast_example.png)
 
-> **Honest caveat.** These results come from *synthetic* patients whose physiology we designed, so they are an upper bound and not a clinical claim. The value of the PoC is the end-to-end, leakage-free pipeline. The next step is validation on real paired data (see roadmap).
+### External validation on real people (CGMacros)
+
+The same pipeline, with one data adapter, was run on **45 real adults** (15 healthy, 16 prediabetes, 14 T2D) from the open-access [CGMacros](https://physionet.org/content/cgmacros/1.0.0/) dataset: Dexcom/Libre CGM, Fitbit heart rate and activity, macro-annotated meals and fasting labs. Twins were calibrated on the first 60% of each recording. The ML layer was evaluated with **5-fold leave-subjects-out** cross-validation on the last 40%. Full report: [`reports/REAL_DATA_VALIDATION.md`](reports/REAL_DATA_VALIDATION.md).
+
+| Model (real data) | RMSE @30 | RMSE @60 | RMSE @120 |
+|---|---|---|---|
+| Persistence | 20.0 | 29.1 | 38.6 |
+| Twin only (physiology) | 28.1 | 32.1 | 32.7 |
+| CGM only | 16.6 | 23.8 | 28.7 |
+| + Wearable & meal log | 15.9 | 23.2 | 28.1 |
+| + Labs/EHR (stream fusion) | 15.9 | 23.5 | 28.2 |
+| **+ Twin physiology (full hybrid)** | 15.6 | 22.5 | 27.1 |
+
+- On real data the full hybrid beats persistence by **22%** at 60 min and beats CGM-only at every horizon. Clarke A+B is **99.6%**.
+- **281/298** real excursions above 180 mg/dL were flagged in advance (median lead **68 min**) at an uncalibrated threshold that produces 2.6 false alerts per day. Tuning this to the ≤ 1/day clinical operating point is the next step.
+- Where it does **not** help yet: the twin alone is worse than persistence at 30 min (its value is at longer horizons and for simulation), and fasting labs add no measurable accuracy with n = 45.
+
+![Real-data ablation](reports/figures/real_ablation_rmse.png)
+
+> **Honest caveat.** The synthetic results are an upper bound, because we designed that physiology. The CGMacros results are the realistic estimate, but on a small, non-Indian cohort without sleep or HRV data. Neither is a clinical claim.
 
 ## 7. Run it
 
@@ -134,6 +154,13 @@ Evaluation protocol (no leakage): **subject-level split**, 48 train / 16 conform
 pip install -r requirements.txt
 python -m glucotwin.pipeline           # generate cohort → calibrate 80 twins → train → evaluate (~3 min)
 uvicorn glucotwin.api:app --port 8000  # open http://localhost:8000
+
+# optional: external validation on real data (downloads ~7 MB of CGMacros CSVs from PhysioNet)
+python scripts/fetch_cgmacros.py
+python -m glucotwin.realdata
+
+# optional: rebuild docs/architecture.pdf and docs/presentation.pdf (needs Chrome or Edge)
+python scripts/build_docs.py
 ```
 
 Or with Docker: `docker compose up --build`, then open http://localhost:8000.
@@ -172,27 +199,28 @@ glucotwin/
   models.py       LightGBM forecaster (CQR intervals) and event classifiers (TreeSHAP)
   metrics.py      RMSE/MARD, Clarke error grid, event-level lead time, alert-burden threshold
   pipeline.py     end-to-end training + evaluation + figures + report
+  realdata.py     CGMacros adapter + leave-subjects-out real-data validation
   service.py      clinical service layer (ward, insights, summaries, simulation)
   api.py          FastAPI app
 dashboard/        clinician UI (HTML/CSS/JS + Plotly)
+scripts/          fetch_cgmacros.py (range-request CSV extraction), build_docs.py (PDF rendering)
 tests/            pytest suite
-reports/          RESULTS.md, metrics.json, figures
-docs/             architecture diagram, presentation, video link
+reports/          RESULTS.md, REAL_DATA_VALIDATION.md, metrics, figures
+docs/             architecture.pdf, presentation.pdf and their HTML sources
 ```
 
 ## 9. Data and the sandbox rules
 
 All data is **synthetic** and generated by this repository (seed 2026), so no real patient data is used. This complies with the challenge sandbox rules, the DPDP Act 2023 and HIPAA. The generator's priors are anchored on published literature (ICMR-INDIAB; ADAG HbA1c–glucose relation; Bergman minimal model; IFCT 2017 / international GI tables).
 
-**Designed for real data next.** The loaders take the same shape as these open datasets, which the roadmap targets for external validation:
-- **CGMacros** (PhysioNet): CGM + Fitbit + meal macros + bloodwork, including T2D participants
+**Validated on real data.** [CGMacros](https://physionet.org/content/cgmacros/1.0.0/) (PhysioNet, CC BY-NC-SA 4.0; Gutierrez-Osuna et al., 2025) is used for external validation. Its raw data is not redistributed here; `scripts/fetch_cgmacros.py` downloads it. Further open datasets on the roadmap:
 - **Shanghai T1DM/T2DM CGM dataset** (Zhao et al., *Scientific Data* 2023): CGM + clinical + medication data
 - **BIG IDEAs Lab Glycemic Variability** (PhysioNet): CGM + Empatica wearable
 - **Synthea** for larger FHIR EHR cohorts
 
 ## 10. Roadmap
 
-1. External validation on CGMacros and Shanghai T2DM (leave-subject-out).
+1. Validation on Indian CGM cohorts with partner diabetologists, and on the Shanghai T2DM dataset; calibrate the real-data alert threshold.
 2. Particle-filter / Bayesian state estimation for twin uncertainty, and medication-titration simulation.
 3. Patient-side app with Hindi and Kannada alerts, and an ASHA-worker low-bandwidth mode (SMS / WhatsApp).
 4. ABDM sandbox integration (HIP/HIU consent flow) and a prospective pilot with a partner clinic.
@@ -202,8 +230,8 @@ All data is **synthetic** and generated by this repository (seed 2026), so no re
 | Item | Link |
 |---|---|
 | Video walkthrough (≥ 20 min) | _<unlisted YouTube link>_ |
-| Architecture diagram (PDF) | _to be added: `docs/architecture.pdf`_ |
-| Presentation (PDF) | _to be added: `docs/presentation.pdf`_ |
+| Architecture diagram (PDF) | [`docs/architecture.pdf`](docs/architecture.pdf) |
+| Presentation (PDF) | [`docs/presentation.pdf`](docs/presentation.pdf) |
 
 ## 12. License
 

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GlucoTwin India Presentation</title>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root {
+    --ink: #0f172a; --muted: #475569; --soft: #94a3b8; --line: #e2e8f0; --bg: #ffffff; --panel: #f8fafc;
+    --blue: #2563eb; --violet: #7c3aed; --green: #059669; --amber: #d97706; --red: #dc2626; --pink: #db2777;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #e5e7eb; font-family: "Segoe UI", Inter, system-ui, sans-serif; color: var(--ink); }
+  .slide { width: 1280px; height: 720px; background: var(--bg); position: relative; overflow: hidden;
+           padding: 56px 72px 48px; page-break-after: always; break-after: page; display: flex; flex-direction: column; }
+  .slide:last-child { page-break-after: auto; }
+  .kicker { font-size: 14px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 8px; }
+  h1 { font-size: 40px; line-height: 1.12; margin: 0 0 18px; letter-spacing: -0.015em; }
+  h2 { font-size: 22px; margin: 0 0 8px; }
+  p, li { font-size: 21px; line-height: 1.45; color: var(--muted); }
+  ul { margin: 0; padding-left: 22px; }
+  li { margin: 9px 0; }
+  b, strong { color: var(--ink); }
+  .foot { position: absolute; left: 72px; right: 72px; bottom: 22px; display: flex; justify-content: space-between; font-size: 12px; color: var(--soft); }
+  .cols { display: grid; gap: 28px; flex: 1; min-height: 0; }
+  .c2 { grid-template-columns: 1fr 1fr; } .c3 { grid-template-columns: repeat(3, 1fr); } .c4 { grid-template-columns: repeat(4, 1fr); }
+  .c55 { grid-template-columns: 5fr 6fr; } .c64 { grid-template-columns: 6fr 4fr; } .c46 { grid-template-columns: 4fr 6fr; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+  .card h2 { font-size: 19px; }
+  .card p { font-size: 17px; margin: 4px 0 0; }
+  .stat { font-size: 52px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .stat small { font-size: 20px; font-weight: 600; color: var(--muted); }
+  .statlbl { font-size: 15px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+  .tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-right: 6px; }
+  img.fig { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
+  .figbox { min-height: 0; display: flex; align-items: center; justify-content: center; }
+  img.fig.shot { width: auto; height: auto; max-width: 100%; max-height: 100%; }
+  .shot { border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(15,23,42,.12); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th { text-align: left; color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--line); padding: 6px 8px; font-size: 13px; }
+  td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+  td.n { text-align: right; font-family: Consolas, monospace; }
+  tr.hl td { background: #eff6ff; font-weight: 700; color: var(--ink); }
+  .num { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: #fff; font-weight: 800; margin-right: 10px; font-size: 16px; }
+  .step { display: flex; align-items: flex-start; margin-bottom: 14px; }
+  .step div p { margin: 2px 0 0; font-size: 16px; }
+  .eq { font-family: Consolas, monospace; font-size: 16px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; padding: 12px 16px; color: #4c1d95; line-height: 1.7; }
+  .quote { font-size: 26px; line-height: 1.4; color: var(--ink); border-left: 5px solid var(--violet); padding-left: 22px; }
+  /* title slide */
+  .title { background: radial-gradient(1200px 600px at 85% 20%, #ede9fe 0%, transparent 60%), radial-gradient(900px 500px at 10% 100%, #dbeafe 0%, transparent 60%), #fff; justify-content: center; }
+  .title h1 { font-size: 64px; margin-bottom: 10px; }
+  .title .sub { font-size: 24px; color: var(--muted); max-width: 900px; line-height: 1.4; }
+  .logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, var(--blue), var(--violet)); color: #fff; display: grid; place-items: center; font-size: 34px; font-weight: 800; margin-bottom: 26px; }
+  .teamline { margin-top: 44px; font-size: 18px; color: var(--muted); }
+  .teamline b { font-size: 22px; }
+  .dark { background: #0f172a; color: #e5e7eb; }
+  .dark h1, .dark b { color: #fff; } .dark p, .dark li { color: #cbd5e1; } .dark .kicker { color: #a78bfa; }
+  @media screen { .slide { margin: 24px auto; box-shadow: 0 4px 24px rgba(0,0,0,.12); } }
+</style>
+</head>
+<body>
+
+<!-- 1. Title -->
+<section class="slide title">
+  <div class="logo">G</div>
+  <div class="kicker">Happiest Health Digital Twin Challenge 2026</div>
+  <h1>GlucoTwin India</h1>
+  <div class="sub">A personalised digital twin that warns <b>{{lead}} minutes</b> before a glucose spike, and lets a doctor test diet and activity changes on the patient's virtual replica <b>before prescribing them</b>.</div>
+  <div class="teamline"><b>Team Vicimus</b> · Vishwakarma Institute of Technology<br>Chitrangad Ram Sapate · Soham Joshi</div>
+</section>
+
+<!-- 2. Problem -->
+<section class="slide">
+  <div class="kicker">The problem</div>
+  <h1>India manages diabetes by looking in the rear-view mirror</h1>
+  <div class="cols c3" style="flex:0 0 auto;margin-bottom:26px">
+    <div class="card"><div class="stat" style="color:var(--red)">101<small> M</small></div><div class="statlbl">Indians living with diabetes, plus <b>136 M</b> with prediabetes (ICMR-INDIAB, 2023)</div></div>
+    <div class="card"><div class="stat" style="color:var(--amber)">1 in 3</div><div class="statlbl">or fewer reach glycaemic targets. Most complications are driven by uncontrolled excursions</div></div>
+    <div class="card"><div class="stat" style="color:var(--violet)">~26,000</div><div class="statlbl">CGM + smartwatch readings per patient between two 3-monthly OPD visits, that no doctor can read</div></div>
+  </div>
+  <ul>
+    <li><b>HbA1c is an average.</b> It hides the post-meal spikes that carbohydrate-heavy Indian diets (rice, wheat) cause every day.</li>
+    <li><b>Care is reactive.</b> The doctor sees what already happened, never what is about to happen.</li>
+    <li><b>Advice is generic.</b> "Eat less rice" ignores that two patients respond to the same meal in completely different ways.</li>
+  </ul>
+  <div class="card" style="margin-top:22px;border-left:5px solid var(--violet)"><p style="font-size:20px;margin:0"><b>The challenge:</b> fuse the static record (EHR) with the dynamic stream (wearables) into a model that <b>predicts adverse events before they happen</b> and that a doctor can actually use.</p></div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>2</span></div>
+</section>
+
+<!-- 3. Solution -->
+<section class="slide">
+  <div class="kicker">Our solution</div>
+  <h1>A virtual patient the doctor can query, not just a risk score</h1>
+  <div class="cols c3" style="flex:0 0 auto">
+    <div class="card"><span class="tag" style="background:#fee2e2;color:var(--red)">Early warning</span><h2 style="margin-top:12px">"Spike likely in 90 min"</h2><p>Forecasts glucose at 30 / 60 / 120 min with calibrated uncertainty, and flags excursions above 180 mg/dL early enough to act: a walk or a smaller portion.</p></div>
+    <div class="card"><span class="tag" style="background:#ede9fe;color:var(--violet)">What-if</span><h2 style="margin-top:12px">"What if she eats jowar roti instead?"</h2><p>The doctor simulates meals, portions and post-meal walks on <b>this patient's own calibrated physiology</b> and sees the curve before prescribing.</p></div>
+    <div class="card"><span class="tag" style="background:#dbeafe;color:var(--blue)">Explained</span><h2 style="margin-top:12px">"Why is the risk high?"</h2><p>Every alert lists its patient-specific drivers (meal, sleep debt, HRV, trend, physiology) and a pre-consultation summary is drafted automatically.</p></div>
+  </div>
+  <p style="margin-top:26px"><b>Who uses it:</b> endocrinologists and GPs in OPD and tele-consults, diabetes educators for diet counselling. Next: patients and ASHA workers via vernacular alerts.</p>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>3</span></div>
+</section>
+
+<!-- 4. What makes it a twin -->
+<section class="slide">
+  <div class="kicker">Why this is a digital twin</div>
+  <h1>Five properties that separate a twin from a predictor</h1>
+  <div class="cols c2">
+    <div>
+      <div class="step"><span class="num" style="background:var(--blue)">1</span><div><h2>Personalised</h2><p>Six physiological parameters fitted to each patient, starting from a prior built from <b>their EHR</b>.</p></div></div>
+      <div class="step"><span class="num" style="background:var(--green)">2</span><div><h2>Synchronised</h2><p>A state observer pulls the twin toward every new CGM reading. The twin is always "now".</p></div></div>
+      <div class="step"><span class="num" style="background:var(--amber)">3</span><div><h2>Predictive (hybrid)</h2><p>ML learns what physiology leaves out (sleep debt, stress, dawn effect) from the wearable + EHR streams.</p></div></div>
+      <div class="step"><span class="num" style="background:var(--violet)">4</span><div><h2>Simulatable</h2><p>Mechanistic core answers counterfactuals that a pure ML model cannot.</p></div></div>
+      <div class="step"><span class="num" style="background:var(--pink)">5</span><div><h2>Actionable</h2><p>Triage, explanations and summaries in the doctor's workflow.</p></div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <div class="quote">Static EHR stream <b>×</b> dynamic wearable stream <b>→</b> a physiological replica, updated every 5 minutes.</div>
+      <div class="card"><p><b>Static:</b> demographics, diagnoses, HbA1c history, labs, medications, TCF7L2 genotype, polygenic risk (HL7 FHIR R4)</p><p style="margin-top:8px"><b>Dynamic:</b> CGM, heart rate, HRV, steps, sleep stages, meal log (Apple Health / Google Fit-style)</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>4</span></div>
+</section>
+
+<!-- 5. Architecture -->
+<section class="slide" style="padding:34px 40px 40px">
+  <div class="kicker" style="margin-left:12px">System architecture</div>
+  <div class="figbox" style="flex:1"><img class="fig" src="../architecture.png"></div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>5</span></div>
+</section>
+
+<!-- 6. Data -->
+<section class="slide">
+  <div class="kicker">Data &amp; the sandbox rules</div>
+  <h1>Synthetic Indian cohort for development, real people for validation</h1>
+  <div class="cols c2">
+    <div class="card">
+      <h2>Synthetic virtual-patient engine</h2>
+      <ul style="margin-top:8px">
+        <li><b>80 Indian T2D / prediabetes patients × 14 days</b></li>
+        <li>Ground-truth physiology: extended Bergman model with dawn phenomenon, sleep-debt insulin resistance, stress, SU / insulin action</li>
+        <li><b>27-item Indian meal library</b> with regional (North / South) diets</li>
+        <li>CGM sensor model: lag, AR(1) noise, dropouts; imperfect meal logging</li>
+        <li>EHR exported as <b>FHIR R4</b> (SNOMED, LOINC, RxNorm, ABHA)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Real-world validation: CGMacros</h2>
+      <ul style="margin-top:8px">
+        <li>Open-access PhysioNet dataset, <b>{{real_n}} real adults</b> ({{real_mix}})</li>
+        <li>Dexcom / Libre CGM + Fitbit heart rate &amp; activity + macro-annotated meals + fasting bloodwork</li>
+        <li>Same pipeline, one adapter, <b>no re-design</b></li>
+      </ul>
+      <h2 style="margin-top:18px">Privacy by design</h2>
+      <p>No real identifiable data · DPDP Act 2023 &amp; HIPAA sandbox rules · ABHA masked in UI · runs on-premise in one container</p>
+    </div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>6</span></div>
+</section>
+
+<!-- 7. Twin core -->
+<section class="slide">
+  <div class="kicker">Twin core</div>
+  <h1>A calibrated physiological model, kept in sync with the patient</h1>
+  <div class="cols c55">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="eq">G′ = −(SG + X + A)·G + SG·Gb + Ra(t)/V<br>X′ = p2·(kx·max(G − Gb, 0) − X)<br>A′ = (k_ex·cadence − A)/15<br>Ra = Σ meals f·carbs·s/τ²·e<sup>−s/τ</sup></div>
+      <ul>
+        <li><b>EHR prior</b>: Gb ← fasting glucose, insulin action ← HbA1c and disease status</li>
+        <li><b>MAP calibration</b> of Gb, SG, kx, p2, gut speed, exercise sensitivity on days 1–10</li>
+        <li><b>Observer</b> corrects state at every CGM reading</li>
+        <li>Meal absorption speed derived from <b>carbs, GI, fat, protein, fibre</b></li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;min-height:0">
+      <div class="figbox" style="flex:1"><img class="fig" src="../../reports/figures/twin_recovery.png"></div>
+      <p style="font-size:15px;margin:0">The twin recovers the hidden physiology of each synthetic patient: Spearman ρ = <b>{{rho_kx}}</b> (insulin action), <b>{{rho_gb}}</b> (basal glucose). Personal calibration cuts the twin's forecast loss by <b>{{calib_gain}}%</b> vs the EHR-only prior.</p>
+    </div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>7</span></div>
+</section>
+
+<!-- 8. ML layer -->
+<section class="slide">
+  <div class="kicker">Hybrid ML layer</div>
+  <h1>Machine learning corrects what physiology cannot see</h1>
+  <div class="cols c2">
+    <div>
+      <ul>
+        <li><b>~85 fused features</b> per 5-min step: CGM trends, steps, HR, HRV vs personal baseline, last night's sleep, logged carbs and glycaemic load, EHR, <b>twin-simulated trajectories</b>, carbs on board, insulin action</li>
+        <li><b>LightGBM</b> forecasts Δglucose at 30 / 60 / 120 min</li>
+        <li><b>Conformalised quantile regression</b> gives 90% intervals with guaranteed coverage</li>
+        <li><b>Event classifiers</b> for spikes (&gt;180) and hypos (&lt;70) within 2 h</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card"><h2>Alert fatigue is a safety issue</h2><p>The alert threshold is chosen as the most sensitive operating point with <b>≤ 1 false alert per patient-day</b> on held-out calibration patients, not by maximising a statistic.</p></div>
+      <div class="card"><h2>Explainable by design</h2><p>TreeSHAP contributions are grouped by data stream and translated into plain language: "carbs eaten in the last hour", "sleep debt", "HRV below personal baseline".</p></div>
+      <div class="card"><h2>Leakage-proof</h2><p>Every feature uses only data available at time t. A unit test perturbs the future and checks that present features do not change.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>8</span></div>
+</section>
+
+<!-- 9. Results synthetic -->
+<section class="slide">
+  <div class="kicker">Results · unseen patients, unseen days</div>
+  <h1>Every data stream adds value, and the hybrid twin is best</h1>
+  <div class="cols c46">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card"><div class="stat" style="color:var(--blue)">{{rmse60}}<small> mg/dL</small></div><div class="statlbl">60-min forecast RMSE (persistence: {{pers60}}) · MARD {{mard60}}%</div></div>
+      <div class="card"><div class="stat" style="color:var(--green)">{{detected_pct}}<small>%</small></div><div class="statlbl">of excursions &gt;180 flagged in advance ({{detected}}), median lead <b>{{lead}} min</b>, {{fa}} false alerts / patient-day</div></div>
+      <div class="card"><div class="stat" style="color:var(--violet)">{{clarke}}<small>%</small></div><div class="statlbl">Clarke error grid zones A+B at 60 min · 90% intervals cover {{coverage}}%</div></div>
+    </div>
+    <div class="figbox"><img class="fig" src="../../reports/figures/ablation_rmse.png"></div>
+  </div>
+  <div class="foot"><span>Protocol: subject split 48 / 16 / 16 · twin calibrated on days 1–10 · metrics on days 11–14</span><span>9</span></div>
+</section>
+
+<!-- 10. Clinical accuracy -->
+<section class="slide">
+  <div class="kicker">Clinical accuracy</div>
+  <h1>Clinically safe forecasts, with honest uncertainty</h1>
+  <div class="cols c2">
+    <div class="figbox"><img class="fig" src="../../reports/figures/clarke_60min.png"></div>
+    <div style="display:flex;flex-direction:column;gap:14px;min-height:0">
+      <div class="figbox" style="flex:1"><img class="fig" src="../../reports/figures/forecast_example.png"></div>
+      <table>
+        <tr><th>Horizon</th><th style="text-align:right">RMSE</th><th style="text-align:right">MARD</th><th style="text-align:right">Clarke A</th><th style="text-align:right">90% PI coverage</th></tr>
+        {{final_rows}}
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>10</span></div>
+</section>
+
+<!-- 11. Real data -->
+<section class="slide">
+  <div class="kicker" style="color:var(--green)">External validation on real people</div>
+  <h1>It works on real CGM data too: {{real_n}} adults, CGMacros</h1>
+  <div class="cols c55">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <table>
+        <tr><th>Model (leave-subjects-out)</th><th style="text-align:right">RMSE@30</th><th style="text-align:right">@60</th><th style="text-align:right">@120</th></tr>
+        {{real_rows}}
+      </table>
+      <p style="font-size:15px;margin:4px 0 0">Twin calibrated on the first 60% of each recording; ML never sees the test participants; metrics on the last 40%. {{real_events}}</p>
+      <p style="font-size:15px;margin:0">No HRV or sleep staging in CGMacros, activity from Fitbit METs, and the cohort is American. The same pipeline ran with a single adapter.</p>
+    </div>
+    <div class="figbox"><img class="fig" src="../../reports/figures/real_ablation_rmse.png"></div>
+  </div>
+  <div class="foot"><span>Data: Gutierrez-Osuna et al., CGMacros v1.0.0, PhysioNet 2025, CC BY-NC-SA 4.0</span><span>11</span></div>
+</section>
+
+<!-- 12. Dashboard -->
+<section class="slide" style="padding:40px 56px 40px">
+  <div class="kicker">The doctor's view</div>
+  <h1 style="font-size:32px;margin-bottom:14px">A virtual ward, triaged by 2-hour risk, with the twin of every patient</h1>
+  <div class="figbox" style="flex:1"><img class="fig shot" src="dashboard_top.png"></div>
+  <div class="foot"><span>Live stream replay · forecast cone · twin trajectory · "why this alert" · wearables · twin phenotype</span><span>12</span></div>
+</section>
+
+<!-- 13. What-if -->
+<section class="slide">
+  <div class="kicker" style="color:var(--violet)">What-if simulator</div>
+  <h1>Ask the twin before you prescribe</h1>
+  <div class="figbox" style="flex:1;margin-bottom:16px"><img class="fig shot" src="whatif.png"></div>
+  <div class="cols c3" style="flex:0 0 auto">
+    <div class="card"><h2>One meal, three futures</h2><p>No further meal vs. rice-dal-sabzi vs. the same meal + a 15-min walk, simulated from the patient's <b>current</b> state.</p></div>
+    <div class="card"><h2>Best swaps</h2><p>Ranks region-appropriate alternatives by simulated time above 180 mg/dL <b>for this patient</b>.</p></div>
+    <div class="card"><h2>Personal food response</h2><p>From the patient's own logs: white rice +90 mg/dL vs jowar roti +53 mg/dL.</p></div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>13</span></div>
+</section>
+
+<!-- 14. India -->
+<section class="slide">
+  <div class="kicker">Built for India</div>
+  <h1>Designed around Indian patients, food and health infrastructure</h1>
+  <div class="cols c4" style="flex:0 0 auto">
+    <div class="card"><h2>🍛 Indian diet</h2><p>27 dishes (idli, dosa, poha, paratha, rajma chawal, biryani, ragi, jowar, chai-biscuits…) with GI and macros driving absorption.</p></div>
+    <div class="card"><h2>🧬 South Asian phenotype</h2><p>Diabetes at lower BMI, higher insulin resistance, TCF7L2 risk alleles, polygenic risk.</p></div>
+    <div class="card"><h2>🏥 ABDM-ready</h2><p>HL7 FHIR R4 resources and ABHA identifiers, ready for HIP/HIU consent flows.</p></div>
+    <div class="card"><h2>🔒 DPDP Act 2023</h2><p>Synthetic / anonymised data, masking, purpose limitation, on-premise single-container deployment.</p></div>
+  </div>
+  <div class="cols c2" style="margin-top:24px;flex:0 0 auto">
+    <div class="card"><h2>Pre-consultation summary</h2><p>Auto-drafted narrative (TIR, GMI, variability, food response, sleep effect, phenotype) with discussion points, so a 5-minute OPD slot starts informed.</p></div>
+    <div class="card"><h2>Low-cost path to scale</h2><p>Works with affordable 14-day CGMs and any smartwatch; next: Hindi / Kannada alerts and an ASHA-worker low-bandwidth mode.</p></div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>14</span></div>
+</section>
+
+<!-- 15. Limits & roadmap -->
+<section class="slide">
+  <div class="kicker">Honest limitations &amp; roadmap</div>
+  <h1>What a proof of concept can and cannot claim</h1>
+  <div class="cols c2">
+    <div class="card">
+      <h2>Limitations</h2>
+      <ul style="margin-top:6px">
+        <li>Synthetic results are an <b>upper bound</b>: we designed that physiology</li>
+        <li>CGMacros is small (n = {{real_n}}), US-based and has no sleep / HRV</li>
+        <li>Meal GI not annotated in real data (default used)</li>
+        <li>Decision support only; not a medical device</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Roadmap</h2>
+      <ul style="margin-top:6px">
+        <li><b>Validate</b> on Indian CGM cohorts with partner diabetologists</li>
+        <li><b>Twin upgrades</b>: particle-filter state estimation, medication-titration simulation</li>
+        <li><b>Patient app</b>: vernacular alerts, WhatsApp / SMS for ASHA workers</li>
+        <li><b>ABDM sandbox</b> integration and a prospective clinic pilot</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>GlucoTwin India · Team Vicimus</span><span>15</span></div>
+</section>
+
+<!-- 16. Close -->
+<section class="slide dark" style="justify-content:center">
+  <div class="kicker">Thank you</div>
+  <h1 style="font-size:52px">From reactive HbA1c reviews<br>to a twin that sees the next two hours.</h1>
+  <p style="font-size:22px;margin-top:20px">Team <b>Vicimus</b> · Vishwakarma Institute of Technology<br>Chitrangad Ram Sapate · Soham Joshi</p>
+  <p style="font-size:16px;margin-top:28px">Code (MIT): github.com/chitrangad-ram-sapate/Vicimus_Vishwakarma-Institute-of-Technology<br>Run: <span style="font-family:Consolas,monospace">python -m glucotwin.pipeline &amp;&amp; uvicorn glucotwin.api:app</span></p>
+</section>
+
+</body>
+</html>
